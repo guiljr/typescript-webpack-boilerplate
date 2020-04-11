@@ -1,8 +1,9 @@
 const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
-const path = require('path');
+const webpackCommon = require('./webpack.common.js');
+const commonPaths = require('../paths');
+const WebpackShellPlugin = require('webpack-shell-plugin');
 
-module.exports = merge(common, {
+module.exports = merge(webpackCommon, {
   mode: 'development',
   watch: true,
   devtool: 'inline-source-map',
@@ -14,7 +15,7 @@ module.exports = merge(common, {
           {
             loader: 'ts-loader',
             options: {
-              configFile: path.resolve(__dirname, '/config/tsconfig/tsconfig.json'),
+              configFile: commonPaths.tsConfigDevPath,
               transpileOnly: true,
             },
           },
@@ -22,4 +23,9 @@ module.exports = merge(common, {
       },
     ],
   },
+  plugins: [
+    new WebpackShellPlugin({
+      onBuildEnd: ['yarn run:dev'],
+    }),
+  ],
 });

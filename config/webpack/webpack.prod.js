@@ -1,11 +1,12 @@
 const merge = require('webpack-merge');
-const common = require('./webpack.common.js');
+const webpackCommon = require('./webpack.common.js');
 const commonPaths = require('../paths');
+const WebpackShellPlugin = require('webpack-shell-plugin');
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
-module.exports = merge(common, {
+module.exports = merge(webpackCommon, {
   mode: 'production',
   watch: false,
   devtool: 'source-map',
@@ -17,7 +18,7 @@ module.exports = merge(common, {
           {
             loader: 'ts-loader',
             options: {
-              configFile: commonPaths.tsConfigPath,
+              configFile: commonPaths.tsConfigProdPath,
               transpileOnly: true,
             },
           },
@@ -27,13 +28,17 @@ module.exports = merge(common, {
   },
   plugins: [
     new ForkTsCheckerWebpackPlugin({
-      tsconfig: commonPaths.tsConfigPath,
+      async: true,
+      tsconfig: commonPaths.tsConfigProdPath,
+    }),
+    new WebpackShellPlugin({
+      onBuildEnd: ['yarn run:prod'],
     }),
   ],
   resolve: {
     plugins: [
       new TsconfigPathsPlugin({
-        configFile: commonPaths.tsConfigPath,
+        configFile: commonPaths.tsConfigProdPath,
       }),
     ],
   },
