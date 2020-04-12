@@ -1,41 +1,51 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
+import * as http from 'http';
 
-// Creates and configures an ExpressJS web server.
-class App {
-  // ref to Express instance
-  express: express.Application;
+import logger from './utils/winston-logger';
+import App from './App';
 
-  // Run configuration methods on the Express instance.
-  constructor() {
-    // test
-    this.express = express();
-    this.middleware();
-    this.routes();
+const server = http.createServer(App);
+
+const normalizePort = (val: number | string): number | string | boolean => {
+  const normolizedPort = typeof val === 'string' ? parseInt(val, 10) : val;
+  if (isNaN(normolizedPort)) {
+    return val;
   }
 
-  // Configure Express middleware.
-  private middleware(): void {
-    this.express.use(bodyParser.json());
-    this.express.use(bodyParser.urlencoded({ extended: false }));
+  if (normolizedPort >= 0) {
+    return normolizedPort;
   }
 
-  // Configure API endpoints.
-  private routes(): void {
-    /* This is just to get up and running, and to make sure what we've got is
-     * working so far. This function will change when we start to add more
-     * API endpoints */
-    const router = express.Router();
-    // placeholder route handler
-    router.get('/', (req: express.Request, res: express.Response, next: {}) => {
-      console.log(req);
-      console.log(next);
-      res.json({
-        message: 'Hello World!',
-      });
-    });
-    this.express.use('/', router);
-  }
-}
+  return false;
+};
 
-export default new App().express;
+const port = normalizePort(process.env.PORT || 3000);
+App.set('port', port);
+
+const onError = (error: NodeJS.ErrnoException) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      logger.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      logger.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+};
+
+const onListening = () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
+  logger.info(`Listening on ${bind}`);
+};
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);

@@ -8,19 +8,21 @@
     "clean": "rimraf ./build/* && rimraf ./logs/*",
     "format-fix": "prettier --write src/**/*.ts",
     "format-check": "prettier --check src/**/*.ts",
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "build:prod": "yarn clean && yarn format-fix && webpack --config config/webpack/webpack.prod.js --watch",
     "build:dev": "yarn clean && yarn format-fix && webpack --config config/webpack/webpack.dev.js --watch",
     "start:dev": "NODE_ENV=development yarn build:dev",
     "run:dev": "pm2 start ./config/pm2/pm2-dev-process.config.js",
     "start:prod": "NODE_ENV=production yarn build:prod",
     "run:prod": "pm2 start ./config/pm2/pm2-prod-process.config.js",
-    "monitor": "pm2 monit",
-    "logs": "pm2 logs api-rest --lines 2000",
-    "stop": "pm2 delete api-rest && yarn clean"
+    "logs": "pm2 logs typescript-webpack --lines 2000",
+    "stop": "pm2 delete typescript-webpack && yarn clean"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "webpack",
+    "typescript",
+    "jest"
+  ],
+  "author": "guil",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^13.11.1",
